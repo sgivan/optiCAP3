@@ -33,6 +33,14 @@ use vars qw/ $opt_f $opt_o $opt_h $opt_v $opt_O /;
 my($file_in, $file_out, $file_log, $file_info, $verbose,@alignment);
 my $cap3_opt = '-z 1 -p 66';
 
+#################################################
+#	Gather User More Input          			#
+#  And determine processor type                 #
+#################################################
+
+getopts('f:vho:O');
+
+$verbose = $opt_v;
 ################################################*
 #   Determine processor type                    #
 ################################################*
@@ -47,13 +55,7 @@ if ($lscpu =~ /AuthenticAMD/) {
     $cap3 .= ".intel" if (-x $cap3 . ".intel");
 }
 print "using '$cap3'\n" if ($verbose);
-
-#################################################
-#	Gather User Input			#
-#################################################
-
-
-getopts('f:vho:O');
+exit();
 
 if ($opt_h) {# Print help menu if -h is given
 print <<HELP;
@@ -73,7 +75,7 @@ HELP
 exit(0);
 }
 
-$verbose = 1 if ($opt_v);
+#$verbose = 1 if ($opt_v);
 
 if ($ARGV[0]) {
   if (-e $ARGV[0]) {
