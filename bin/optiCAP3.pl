@@ -31,9 +31,22 @@ use vars qw/ $opt_f $opt_o $opt_h $opt_v $opt_O /;
 #################################################
 
 my($file_in, $file_out, $file_log, $file_info, $verbose,@alignment);
-my $cap3 = '/mnt/local/cluster/bin/cap3';
 my $cap3_opt = '-z 1 -p 66';
 
+################################################*
+#   Determine processor type                    #
+################################################*
+my $cap3 = '/ircf/ircfapps/bin/cap3';
+
+my $lscpu = `lscpu`;
+chomp($lscpu);
+#print "cpu: '$lscpu'\n";
+if ($lscpu =~ /AuthenticAMD/) {
+    $cap3 .= ".opteron" if (-x $cap3 . ".opteron");
+} elsif ($lscpu =~ /Intel/) {
+    $cap3 .= ".intel" if (-x $cap3 . ".intel");
+}
+print "using '$cap3'\n" if ($verbose);
 
 #################################################
 #	Gather User Input			#
@@ -101,6 +114,10 @@ open(LOG,">$file_log") or die "can't open '$file_log': $!";
 if ($verbose) {
   print LOG "Running CAP3:  $cap3 $file_in $cap3_opt > $file_out\n";
 }
+
+#
+# Start first cap3 run
+#
 
 if (!$opt_O) {
   open(CAP3, "| $cap3 $file_in $cap3_opt > $file_out") or die "can't open $cap3: $!";
