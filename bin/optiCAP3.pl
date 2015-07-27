@@ -21,7 +21,8 @@ use strict;
 use Carp;
 use File::Copy;
 use Getopt::Std;
-use vars qw/ $opt_f $opt_o $opt_h $opt_v $opt_O /;
+use autodie;
+use vars qw/ $opt_f $opt_o $opt_h $opt_v $opt_O $opt_c /;
 
 
 
@@ -38,7 +39,7 @@ my $cap3_opt = '-z 1 -p 66';
 #  And determine processor type                 #
 #################################################
 
-getopts('f:vho:O');
+getopts('f:vho:Oc');
 
 $verbose = $opt_v;
 ################################################*
@@ -55,7 +56,7 @@ if ($lscpu =~ /AuthenticAMD/) {
     $cap3 .= ".intel" if (-x $cap3 . ".intel");
 }
 print "using '$cap3'\n" if ($verbose);
-exit();
+#exit();
 
 if ($opt_h) {# Print help menu if -h is given
 print <<HELP;
@@ -68,6 +69,7 @@ Command-line Options	Description
     -f			input file name
     -o			output file name [optional]
     -O			send alignment to terminal
+    -c          copy files from first run to first_run directory
     -v			verbose output to terminal
     -h			print this help menu
 
@@ -134,6 +136,21 @@ if ($?) {
   print "can't close $cap3 (returned '$?'): $!";
   print "\n";
   exit;
+}
+
+if ($opt_c) { # copy files from first run to first_run directory
+    if (!mkdir('first_run')) {
+        print "can't create 'first_run' directory";
+        exit();
+    } else {
+        my $dh; # will contain directory handle
+        opendir($dh,"./");
+        #for my $file (grep("$file_in" . ".cap.", readdir($dh))) {
+        for my $file (grep {/$file_in\.cap\./} readdir($dh)) {
+            copy($file,"first_run/$file");
+        }
+        closedir($dh);
+    }
 }
 
 $file_info = $file_in . ".cap.info";
