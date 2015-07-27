@@ -45,7 +45,7 @@ $verbose = $opt_v;
 ################################################*
 #   Determine processor type                    #
 ################################################*
-my $cap3 = '/ircf/ircfapps/bin/cap3';
+my $cap3 = '/share/ircf/ircfapps/bin/cap3';
 
 my $lscpu = `lscpu`;
 chomp($lscpu);
