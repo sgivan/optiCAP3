@@ -163,25 +163,25 @@ close(INFO);
 
 my %clips;
 for (my $i = 0; $i < scalar(@info); ++$i) {
-  my ($read,$clip,$dir,$clip5,$clip3) = ();
-  if ($info[$i] =~ /^No\soverlap.+?read\s([\w_\.\-\|]+)$/) {
-    $read = $1;
-    $clips{$read} = [250,250] unless ($clips{$read});
-    if ($info[$i + 1] =~ /\W*([35]).+?overlaps:\s(\d+)\s/) {
-      $dir = $1;
-      $clip = $2;
+    my ($read,$clip,$dir,$clip5,$clip3) = ();
+    if ($info[$i] =~ /^No\soverlap.+?read\s([\w_\.\-\|]+)$/) {
+            $read = $1;
+            $clips{$read} = [250,250] unless ($clips{$read});
+            if ($info[$i + 1] =~ /\W*([35]).+?overlaps:\s(\d+)\s/) {
+                $dir = $1;
+                $clip = $2;
 
-      if ($dir == 5) {
-	$clip5 = "$clip";
-	$clips{$read}->[0] = $clip5;
-      } elsif ($dir == 3) {
-	$clip3 = "$clip";
-	$clips{$read}->[1] = $clip3;
-      }
+                if ($dir == 5) {
+                    $clip5 = "$clip";
+                    $clips{$read}->[0] = $clip5;
+                } elsif ($dir == 3) {
+                    $clip3 = "$clip";
+                    $clips{$read}->[1] = $clip3;
+                }
+
+            }
 
     }
-
-  }
 }
 
 if (%clips) {
