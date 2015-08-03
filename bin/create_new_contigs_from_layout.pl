@@ -27,7 +27,7 @@ use strict;
 use IO::File;
 use IO::Handle;
 
-my ($debug,$verbose,$help,$infofile,$seqfile,$extractseq,$minleftclip,$minrightclip);
+my ($debug,$verbose,$help,$infofile,$seqfile,$extractseq,$minlclip,$minrclip,$rename_int,$minlength,$deletefile);
 
 my $result = GetOptions(
     "debug"     =>  \$debug,
@@ -36,8 +36,11 @@ my $result = GetOptions(
     "info:s"      =>  \$infofile,
     "seq:s"       =>  \$seqfile,
     "extractseq:s"  =>  \$extractseq,
-    "minleftclip:i" =>  \$minleftclip,
-    "minrightclip:i"    =>  \$minrightclip,
+    "minlclip:i" =>  \$minlclip,
+    "minrclip:i"    =>  \$minrclip,
+    "rename:i"      =>  \$rename_int,
+    "delete"        =>  \$deletefile,
+    "minlength:i"   =>  \$minlength,
 );
 
 if ($help) {
@@ -50,6 +53,15 @@ $infofile ||= 'infofile';
 $seqfile ||= 'seqfile';
 $extractseq ||= `which extractseq`;
 chomp($extractseq);
+$minlclip ||= 50;
+$minrclip ||= 50;
+my $integer = $rename_int if ($rename_int);
+$minlength ||= 300;
+
+#if ($integer) {
+#    say "renaming, starting with '$integer'";
+#    exit();
+#}
 
 
 if ($debug) {
@@ -65,34 +77,67 @@ if ($fh_info->open("< $infofile")) {
 say @clip if ($debug);
 
 for my $clipdata (@clip) {
-    my ($seqname,$leftclip,$rightclip,$length,$rightsize);
+    my ($seqname,$lclip,$rclip,$length,$rightsize);
 
     # lines look like this:
     # Clip C158 left clip: 1, right clip: 226,  length: 3272,  right size 3046
+    # --> removes 227-3272 from C158
     # Clip C133 left clip: 5043, right clip: 5271,  length: 5271,  right size 0
+    # --> removes 1-5043 from C133
+    # Clip C54 left clip: 325, right clip: 27061,  length: 27939,  right size 878
     #
     if ($clipdata =~ /Clip\s(.+?)\sleft\sclip:\s(\d+),\s+right\sclip:\s(\d+),\s+length:\s+(\d+),\s+right\ssize\s(\d+)/) { 
         $seqname = $1;
-        $leftclip = $2;
-        $rightclip = $3;
+        $lclip = $2;
+        $rclip = $3;
         $length = $4;
         $rightsize = $5;
 
         if ($debug) {
            print "seqname: '$seqname', ";
-           print "left clip: '$leftclip', ";
-           print "right clip: '$rightclip', ";
+           print "left clip: '$lclip', ";
+           print "right clip: '$rclip', ";
            print "length: '$length', ";
            print "right size: '$rightsize'\n";
        }
    }
 
-   if ($leftclip > $minleftclip) {
-       my $outfilename = "$seqname" . "_1-$leftclip";
-        open(EX, "|-", "$extractseq -sequence $seqfile:$seqname -regions 1-$leftclip -outseq $outfilename");
-        close(EX);
+    if ($lclip >= $minlclip && $rightsize < $minrclip) {
+        # don't bother unless the resulting squence > minimum length
+        if ($lclip <= $minlength) {
+            say "skipping $seqname based on lclip: $lclip < $minlength" if ($debug);
+            next;
+        }
+        my $outfilename = "$seqname" . "_1-$lclip.fa";
+        open(EXSQ, "|-", "$extractseq -auto -sequence $seqfile:$seqname -regions 1-$lclip -outseq $outfilename");
+        close(EXSQ);
+        $integer = renamefile($outfilename,$integer) if ($rename_int);
+    } elsif ($rightsize >= $minrclip) {
+        my $diff = $rclip - $lclip;
+        if ($diff < $minlength) {
+            say "skipping $seqname based on rclip - lclip: $diff < $minlength" if ($debug);
+            #say "skipping $seqname based on rclip - lclip < $minlength" if ($debug);
+            next;
+        }
+        my $outfilename = "$seqname" . "_$lclip-$rclip.fa";
+        open(EXSQ, "|-", "$extractseq -auto -sequence $seqfile:$seqname -regions $lclip-$rclip -outseq $outfilename");
+        close(EXSQ);
+        $integer = renamefile($outfilename,$integer) if ($rename_int);
     }
     
+}
+
+sub renamefile {
+    my $infile = shift;
+    my $integer = shift;
+
+    say "renaming '$infile' to C" . "$integer.fa" if ($debug);
+
+    open(SED, "|-", "sed -E 's/>.+/>C$integer/' $infile > C" . "$integer.fa");
+    if (close(SED)) {
+        unlink($infile) if ($deletefile);
+    }
+    return ++$integer;
 }
 
 sub help {
