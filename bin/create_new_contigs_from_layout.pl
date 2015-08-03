@@ -144,11 +144,18 @@ sub help {
 
     say <<HELP;
 
-    "debug"     =>  \$debug,
-    "verbose"   =>  \$verbose,
-    "help"      =>  \$help,
-    "info"      =>  \$infofile,
-    "seq"       =>  \$seqfile,
+    "debug"
+    "verbose"
+    "help"  
+    "info"          name of *info file created by cap3 
+    "seq"           name of file containing input sequences 
+    "extractseq:s"  path to extractseq (EMBOSS package) -- will try to find it automatically
+    "minlclip:i"    minimum left clip to accept [default = 50]
+    "minrclip:i"    minimum right clip to accept [default = 50]
+    "rename:i"      rename the files and sequences -- argument should be an integer
+                    script will rename files/sequences starting with integer
+    "delete"        delete the original files after renaming
+    "minlength:i"   minimum sequence length to create a new contig file
 
 HELP
 
