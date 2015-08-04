@@ -109,7 +109,7 @@ for my $clipdata (@clip) {
             next;
         }
         my $outfilename = "$seqname" . "_1-$lclip.fa";
-        open(EXSQ, "|-", "$extractseq -auto -sequence $seqfile:$seqname -regions 1-$lclip -outseq $outfilename");
+        open(EXSQ, "|-", "$extractseq -sformat fasta -auto -sequence $seqfile:$seqname -regions 1-$lclip -outseq $outfilename");
         close(EXSQ);
         $integer = renamefile($outfilename,$integer) if ($rename_int);
     } elsif ($rightsize >= $minrclip) {
