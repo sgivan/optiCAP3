@@ -130,8 +130,14 @@ for my $clipdata (@clip) {
 sub renamefile {
     my $infile = shift;
     my $integer = shift;
+    my $mapfilename = 'mapfile.txt';
+
+    open(MAP, ">>", $mapfilename);
 
     say "renaming '$infile' to C" . "$integer.fa" if ($debug);
+    say MAP "renaming '$infile' to C" . "$integer.fa";
+
+    close(MAP);
 
     open(SED, "|-", "sed -E 's/>.+/>C$integer/' $infile > C" . "$integer.fa");
     if (close(SED)) {
