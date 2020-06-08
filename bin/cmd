@@ -1,0 +1,2 @@
+./create_new_contigs_from_layout.pl --debug --info /ircf/projects/brown/best/3K-300K/cap3/optiCAP3/first_run/second_run/optiCAP3/contigs.nfa.cap.info --seq /ircf/projects/brown/best/3K-300K/cap3/optiCAP3/first_run/second_run/optiCAP3/contigs.nfa
+./create_new_contigs_from_layout.pl --debug --info /ircf/projects/brown/best/3K-300K/cap3/optiCAP3/first_run/second_run/optiCAP3/contigs.nfa.cap.info --seq /ircf/projects/brown/best/3K-300K/cap3/optiCAP3/first_run/second_run/optiCAP3/contigs.nfa --rename 200 --delete
